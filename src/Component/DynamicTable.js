@@ -4,26 +4,33 @@ import { useEffect } from "react";
 export default function DynamicTable() {
   const [tableData, setTableData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorHandling, setErrorHandling] = useState(false);
+
   useEffect(() => {
     async function fetchData() {
       setIsLoading(false);
-      let data = await fetch(
-        "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=5min&apikey=demo"
-      );
-      data = await data.json();
-      data = [
-        Object.keys(data?.["Time Series (5min)"]),
-        Object.values(data?.["Time Series (5min)"]),
-      ];
-      if (tableData !== []) {
-        setIsLoading(true);
+      try {
+        let data = await fetch(
+          "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=5min&apikey=demo"
+        );
+        data = await data.json();
+        data = [
+          Object.keys(data?.["Time Series (5min)"]),
+          Object.values(data?.["Time Series (5min)"]),
+        ];
+        if (tableData !== []) {
+          setIsLoading(true);
+        }
+        setTableData(data);
+      } catch (err) {
+        console.log(err);
+        setErrorHandling(true);
       }
-      setTableData(data);
     }
     fetchData();
   }, []);
 
-  console.log(tableData);
+  // console.log(tableData);
   return (
     <>
       <div className="overflow-x-auto relative shadow-md ">
@@ -51,11 +58,23 @@ export default function DynamicTable() {
             </tr>
           </thead>
           <tbody>
-            {!isLoading ? (
+            {errorHandling ? (
               <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 ">
-                <td colspan="6" className="overflow-x-hidden">
+                <td colSpan="6" className="overflow-x-hidden">
                   <button
-                    disabled=""
+                    disabled={true}
+                    type="button"
+                    className="w-full justify-center py-2.5 px-5 mr-2 text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200   focus:z-10 focus:ring-4 focus:outline-none focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600  inline-flex items-center"
+                  >
+                    Something went wrong
+                  </button>
+                </td>
+              </tr>
+            ) : !isLoading ? (
+              <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 ">
+                <td colSpan="6" className="overflow-x-hidden">
+                  <button
+                    disabled={true}
                     type="button"
                     className="w-full justify-center py-2.5 px-5 mr-2 text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200   focus:z-10 focus:ring-4 focus:outline-none focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600  inline-flex items-center"
                   >
